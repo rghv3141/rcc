@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include "token.hpp"
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
@@ -19,7 +20,15 @@ int main(int argc, char** argv) {
 		contents = contents_stream.str();
 	}
 
-	std::cout << contents << std::endl;
+	Tokenizer token(contents);
+	
+		Token tok;
+
+		do {
+			tok = token.getToken();
+			std::cout << tok.TokVal << std::endl;
+		} while (tok.TokVal != "");
 
 	return EXIT_SUCCESS;
 } 
+
