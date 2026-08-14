@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include "token.hpp"
+#include "parser.hpp"
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
@@ -20,14 +21,9 @@ int main(int argc, char** argv) {
 		contents = contents_stream.str();
 	}
 
-	Tokenizer token(contents);
+	Parser parser(contents);
 	
-		Token tok;
-
-		do {
-			tok = token.getToken();
-			std::cout << tok.TokVal << std::endl;
-		} while (tok.TokVal != "");
+	parser.parseStart();
 
 	return EXIT_SUCCESS;
 } 
