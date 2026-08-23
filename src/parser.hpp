@@ -2,12 +2,20 @@
 #include <memory>
 #include "token.hpp"
 #include <iostream>
+#include <utility>
+
+class IdAST;
+class TypeAST;
+class BodyAST;
+class RetAST;
+class ExprAST;
+class FunctionAST;
 
 class startAST {
-	std::unique_ptr<functionAST> function;
+	std::unique_ptr<FunctionAST> function;
 public:
-	startAST(std::unique_ptr<functionAST> fucntion) 
-		: fucntion(std::move(fucntion)) {} 
+	startAST(std::unique_ptr<FunctionAST> fucntion) 
+		: function(std::move(function)) {} 
 };
 
 class TypeAST {
@@ -49,13 +57,13 @@ public:
 	ExprAST(TokenType type, std::string val) : type(type), val(val) {}
 };
 
-class FucntionAST {
+class FunctionAST {
 	std::unique_ptr<TypeAST> type;
 	std::unique_ptr<IdAST> id;
 	std::unique_ptr<BodyAST> body;
 
 public:
-	FucntionAST(std::unique_ptr<TypeAST> type, 
+	FunctionAST(std::unique_ptr<TypeAST> type, 
 				std::unique_ptr<IdAST> id,
 				std::unique_ptr<BodyAST> body)
 		: type(std::move(type)), 
@@ -68,7 +76,7 @@ class Parser {
 public:
 	std::unique_ptr<TypeAST> parseType() {
 		match(TokenType::TYPE_INT, "int");
-		return std::make_unqiue<TypeAST>(TokenType::LIT_INT, "int" );	
+		return std::make_unique<TypeAST>(TokenType::LIT_INT, "int" );	
 	}
 
 	std::unique_ptr<IdAST> parseId() {
@@ -90,10 +98,10 @@ public:
 		auto ret = parseRet();
 		auto expr = parseExpr();
 		
-		return std::make_unique<BodyAST>(ret, expr); 
+		return std::make_unique<BodyAST>(std::move(ret), std::move(expr)); 
 	}
 
-	std::unique_ptr<functionAST> parseFunction() {
+	std::unique_ptr<FunctionAST> parseFunction() {
 		auto type = parseType();
 		auto id = parseId();
 		
@@ -103,23 +111,31 @@ public:
 		
 		match(TokenType::BRACE, "}");
 
-		return make_unique<functionAST>(type, id, body);
+		return make_unique<FunctionAST>(std::move(type), std::move(id), std::move(body));
 	}
 
 	std::unique_ptr<startAST> parseStart() {
-		auto function = parseFucntion();
+		auto function = parseFunction();
 		return std::make_unique<startAST>(std::move(function));
 	}
 
 private:
 	std::string contents;
-	Tokenizer Tok(std::move(contents));
-	Token look_ahead = Tok.getNext();
-
+	Tokenizer Tok;
+	Token look_ahead;
+public:
+	Parser(std::string contents) 
+			: contents(std::move(contents)),
+		      Tok(this->contents),
+		      look_ahead(Tok.getToken())	{}
+private:
 	void match(TokenType expected, std::string val) {
 		if ( look_ahead.Type == expected) {
-			if (look_ahead.TokVal == val)
-				look_ahead = Tok.getNext();
+			if (look_ahead.TokVal == val) {
+                std::cout << "look_ahead: " << look_ahead.TokVal << std::endl; 
+				look_ahead = Tok.getToken();
+					
+			}
 			else {
 				std::cerr << "syntax error" << std::endl;
 				exit(1);
@@ -130,8 +146,4 @@ private:
 			exit(1);
 		}
 	}
-public:
-	Parser(std::string contents) 
-		: contents(std::move(contents)) {}
-	Tokenizer Tok(std::move(contents));
 };
