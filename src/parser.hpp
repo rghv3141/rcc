@@ -55,6 +55,7 @@ class ExprAST {
 	std::string val;
 public:
 	ExprAST(TokenType type, std::string val) : type(type), val(val) {}
+	value *codegen();
 };
 
 class FunctionAST {
@@ -69,6 +70,7 @@ public:
 		: type(std::move(type)), 
 		  id(std::move(id)), 
 		  body(std::move(body)) {}
+	Fucntion *codegen();
 };
 
 
