@@ -42,9 +42,11 @@ Function *FunctionAST::codegen() {
 		return F;
 }
 
-static void InitializeModule() {
+		void InitializeModule() {
 		TheContext = std::make_unique<LLVMContext>();
-		TheModule = std::make_unique<>
+		TheModule = std::make_unique<Module>("my cool jit", *TheContext);
+
+		Builder = std::make_unique<IRBuilder<>>(*TheContext);
 }
 
 

@@ -4,6 +4,8 @@
 #include <sstream>
 #include "token.hpp"
 #include "parser.hpp"
+#include "codegen.hpp"
+#include "llvm/Support/raw_ostream.h"
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
@@ -22,9 +24,10 @@ int main(int argc, char** argv) {
 	}
 
 	Parser parser(contents);
-	
-	parser.parseStart();
-
+	InitializeModule();
+	auto FnAST = parseFunction();
+	auto *FnIR = FnAST->codegen();
+	TheModule->print(errs(), nullptr);
 	return EXIT_SUCCESS;
 } 
 
